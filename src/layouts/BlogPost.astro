@@ -1,0 +1,59 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, tags, readingTime } = post.data;
+
+const formattedDate = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}).format(pubDate);
+---
+
+<BaseLayout title={`${title} — Chaitanya Maili`} description={description}>
+  <article>
+    <header class="mb-10">
+      <a
+        href="/"
+        class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        All posts
+      </a>
+
+      <h1 class="text-3xl font-bold tracking-tight mb-4">{title}</h1>
+
+      <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+        <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+        {readingTime && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{readingTime} min read</span>
+          </>
+        )}
+      </div>
+
+      {tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mt-4">
+          {tags.map((tag: string) => (
+            <span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="prose prose-neutral dark:prose-invert max-w-none">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
