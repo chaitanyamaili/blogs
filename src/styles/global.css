@@ -4,26 +4,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Exact oklch values from chaitanyamaili.in */
 :root {
   --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
+  --foreground: 7.35deg 6.08% 9.9%;
   --card: 0 0% 100%;
-  --border: 240 5.9% 90%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
+  --border: 240 5.3% 89.8%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 43.1%;
+  --primary: 0 0% 14.5%;
+  --primary-foreground: 0 0% 98.5%;
+  --radius: 0.625rem;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --border: 240 3.7% 15.9%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
+  --background: 7.35deg 6.08% 9.9%;
+  --foreground: 0 0% 98.5%;
+  --card: 7.35deg 6.08% 9.9%;
+  --border: 0 0% 18.3%;
+  --muted: 0 0% 18.3%;
+  --muted-foreground: 0 0% 56.3%;
+  --primary: 0 0% 98.5%;
+  --primary-foreground: 0 0% 14.5%;
 }
 
 @layer base {
@@ -35,9 +37,9 @@
   }
 }
 
-/* Prose code block styling */
+/* Prose styling matching main site */
 .prose pre {
-  @apply rounded-md border border-border;
+  @apply rounded-lg border border-border;
 }
 
 .prose code:not(pre code) {

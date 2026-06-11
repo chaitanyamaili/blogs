@@ -18,9 +18,9 @@ export default {
         sans: ['Inter', 'sans-serif'],
       },
       borderRadius: {
-        lg: '0.5rem',
-        md: '0.375rem',
-        sm: '0.25rem',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       typography: () => ({
         DEFAULT: {

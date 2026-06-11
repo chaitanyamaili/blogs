@@ -9,6 +9,7 @@ interface Props {
 }
 
 const { title, description = 'Thoughts on cloud-native engineering, platform infrastructure, and technical leadership by Chaitanya Maili.' } = Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
 
 <!doctype html>
@@ -20,10 +21,10 @@ const { title, description = 'Thoughts on cloud-native engineering, platform inf
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <title>{title}</title>
 
-    <!-- Prevent flash of wrong theme -->
+    <!-- Prevent flash of wrong theme — matches chaitanyamaili.in behaviour -->
     <script is:inline>
       const theme = localStorage.getItem('theme');
       if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -33,7 +34,7 @@ const { title, description = 'Thoughts on cloud-native engineering, platform inf
   </head>
   <body class="min-h-screen flex flex-col">
     <Header />
-    <main class="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-10">
+    <main class="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
       <slot />
     </main>
     <Footer />
