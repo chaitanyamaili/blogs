@@ -148,6 +148,13 @@ declare module 'astro:content' {
   collection: "blog";
   data: InferEntrySchema<"blog">
 } & { render(): Render[".md"] };
+"k8s-pod-design-patterns.md": {
+	id: "k8s-pod-design-patterns.md";
+  slug: "k8s-pod-design-patterns";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
 "staff-to-principal.md": {
 	id: "staff-to-principal.md";
   slug: "staff-to-principal";
