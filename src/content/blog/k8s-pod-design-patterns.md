@@ -14,7 +14,7 @@ This is Part 1 of a series on Kubernetes design patterns from a platform enginee
 
 We'll cover the four fundamental pod-level patterns. For each one, I'll show you what it looks like, why it exists, and — more importantly — the production gotchas that don't make it into the official docs.
 
-**Hands-on practice:** KillerCoda has an excellent interactive environment for multi-container pods: [Multi-Container Pods](https://killercoda.com/killer-shell-cka/scenario/multi-container-pods). I'd recommend following along there as you read.
+**Hands-on practice:** KillerCoda has an excellent interactive environment for multi-container pods. Work through the [CKA Scenario Course](https://killercoda.com/course/cka) or browse [free CKA scenarios](https://killercoda.com/cka) — the multi-container pod exercises are a great starting point. I'd recommend following along as you read.
 
 ---
 
@@ -245,7 +245,8 @@ These patterns aren't mutually exclusive. A real production pod might have an in
 
 The best way to internalize these patterns is to build them yourself. KillerCoda has scenarios specifically for this:
 
-- **[Multi-Container Pods](https://killercoda.com/killer-shell-cka/scenario/multi-container-pods)** — sidecar and init container hands-on
+- **[KillerCoda CKA Scenario Course](https://killercoda.com/course/cka)** — structured scenarios covering multi-container pods, init containers, and more
+- **[Free CKA Scenarios](https://killercoda.com/cka)** — individual exercises you can pick from
 - **[KodeKloud Init Containers Lab](https://kodekloud.com/topic/init-containers-2/)** — focused init container exercises
 
 Work through those with the patterns from this post in mind. The "aha" moments happen when you see what happens when an init container fails, or when a sidecar runs out of memory.

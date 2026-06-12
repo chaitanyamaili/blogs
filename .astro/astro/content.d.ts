@@ -155,6 +155,13 @@ declare module 'astro:content' {
   collection: "blog";
   data: InferEntrySchema<"blog">
 } & { render(): Render[".md"] };
+"k8s-service-communication-patterns.md": {
+	id: "k8s-service-communication-patterns.md";
+  slug: "k8s-service-communication-patterns";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
 "staff-to-principal.md": {
 	id: "staff-to-principal.md";
   slug: "staff-to-principal";

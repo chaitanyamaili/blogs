@@ -12,7 +12,7 @@ All posts
 <p>I’ve been running Kubernetes workloads in production for a while now. I’ve seen patterns that look elegant in a blog post become operational nightmares at scale. I’ve also seen teams avoid patterns that would have saved them weeks of work, just because the pattern felt “too complex.”</p>
 <p>This is Part 1 of a series on Kubernetes design patterns from a platform engineering perspective. Not a reference guide — more like the conversation I wish I’d had before deploying these things into production the first time.</p>
 <p>We’ll cover the four fundamental pod-level patterns. For each one, I’ll show you what it looks like, why it exists, and — more importantly — the production gotchas that don’t make it into the official docs.</p>
-<p><strong>Hands-on practice:</strong> KillerCoda has an excellent interactive environment for multi-container pods: <a href="https://killercoda.com/killer-shell-cka/scenario/multi-container-pods">Multi-Container Pods</a>. I’d recommend following along there as you read.</p>
+<p><strong>Hands-on practice:</strong> KillerCoda has an excellent interactive environment for multi-container pods. Work through the <a href="https://killercoda.com/course/cka">CKA Scenario Course</a> or browse <a href="https://killercoda.com/cka">free CKA scenarios</a> — the multi-container pod exercises are a great starting point. I’d recommend following along as you read.</p>
 <hr>
 <h2 id="pattern-1-the-sidecar">Pattern 1: The Sidecar</h2>
 <p><strong>The idea:</strong> Run a helper container in the same pod as your main application. Both containers share the same network namespace and can share volumes.</p>
@@ -213,7 +213,8 @@ All posts
 <h2 id="practice-environment">Practice Environment</h2>
 <p>The best way to internalize these patterns is to build them yourself. KillerCoda has scenarios specifically for this:</p>
 <ul>
-<li><strong><a href="https://killercoda.com/killer-shell-cka/scenario/multi-container-pods">Multi-Container Pods</a></strong> — sidecar and init container hands-on</li>
+<li><strong><a href="https://killercoda.com/course/cka">KillerCoda CKA Scenario Course</a></strong> — structured scenarios covering multi-container pods, init containers, and more</li>
+<li><strong><a href="https://killercoda.com/cka">Free CKA Scenarios</a></strong> — individual exercises you can pick from</li>
 <li><strong><a href="https://kodekloud.com/topic/init-containers-2/">KodeKloud Init Containers Lab</a></strong> — focused init container exercises</li>
 </ul>
 <p>Work through those with the patterns from this post in mind. The “aha” moments happen when you see what happens when an init container fails, or when a sidecar runs out of memory.</p>

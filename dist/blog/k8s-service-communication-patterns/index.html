@@ -1,0 +1,275 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="ClusterIP, NodePort, LoadBalancer, Ingress, service mesh — not as definitions, but as design decisions with real cost and operational trade-offs. Part 2 of the Kubernetes Design Patterns series."><meta property="og:title" content="Kubernetes Service Communication Patterns: A Decision Guide for Platform Engineers — Chaitanya Maili"><meta property="og:description" content="ClusterIP, NodePort, LoadBalancer, Ingress, service mesh — not as definitions, but as design decisions with real cost and operational trade-offs. Part 2 of the Kubernetes Design Patterns series."><meta property="og:type" content="website"><link rel="icon" type="image/svg+xml" href="/blogsfavicon.svg"><title>Kubernetes Service Communication Patterns: A Decision Guide for Platform Engineers — Chaitanya Maili</title><!-- Prevent flash of wrong theme — matches chaitanyamaili.in behaviour --><script>
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    </script><link rel="stylesheet" href="/blogs/_astro/_slug_.DfAX0kk5.css"><script type="module">const t=document.getElementById("theme-toggle");t?.addEventListener("click",()=>{const e=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",e?"dark":"light")});
+</script></head> <body class="min-h-screen flex flex-col"> <header class="border-b border-border bg-background"> <div class="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between"> <a href="/blogs/" class="flex flex-col"> <span class="font-semibold text-foreground tracking-tight">Chaitanya Maili</span> <span class="text-xs text-muted-foreground">Thinking through the hard parts of engineering, out loud.</span> </a> <nav class="flex items-center gap-5"> <a href="https://chaitanyamaili.in" target="_blank" rel="noopener noreferrer" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+Portfolio ↗
+</a> <button id="theme-toggle" aria-label="Toggle dark mode" class="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"> <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden dark:block"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path> </svg> <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="block dark:hidden"> <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path> </svg> </button> </nav> </div> </header>  <main class="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">  <article> <header class="mb-10"> <a href="/blogs/" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"> <path d="m15 18-6-6 6-6"></path> </svg>
+All posts
+</a> <h1 class="text-3xl font-bold tracking-tight mb-4">Kubernetes Service Communication Patterns: A Decision Guide for Platform Engineers</h1> <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"> <time datetime="2026-06-14T00:00:00.000Z">June 14, 2026</time>  <span aria-hidden="true">·</span> <span>13 min read</span>  </div> <div class="flex flex-wrap gap-2 mt-4"> <span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> kubernetes </span><span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> platform engineering </span><span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> cloud-native </span><span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> networking </span> </div> </header> <div class="prose prose-neutral dark:prose-invert max-w-none">  <p>Here’s a conversation I’ve had more times than I can count:</p>
+<p>Someone is setting up a new service. They need other things to talk to it. They reach for <code>LoadBalancer</code> because it’s the one that sounds the most production-ready. Three months later, their cloud bill has a line item for 12 load balancers — one per service — and nobody can explain why the architecture ended up that way.</p>
+<p>Or the opposite: they chose <code>ClusterIP</code> for everything, then spent a week debugging why their frontend couldn’t reach the backend, not realising the service was only reachable inside the cluster.</p>
+<p>Service communication in Kubernetes is one of those areas where the documentation is thorough, the options are clearly listed, and yet teams consistently make choices they later regret. Usually because they picked based on what sounded right, not based on a clear model of what each option actually does.</p>
+<p>This is Part 2 of the Kubernetes Design Patterns series. We’re going to build that model.</p>
+<p><strong>Hands-on:</strong> Work through Ingress and Service scenarios in the <a href="https://killercoda.com/course/cka">KillerCoda CKA Course</a> or browse <a href="https://killercoda.com/cka">free CKA scenarios</a>. The networking labs are directly relevant to everything in this post.</p>
+<hr>
+<h2 id="the-mental-model-first">The Mental Model First</h2>
+<p>Before we get into the specific types, one framing that makes everything else clearer:</p>
+<p>Kubernetes networking has two fundamentally different traffic directions:</p>
+<ul>
+<li><strong>East-west traffic</strong> — service to service, inside the cluster</li>
+<li><strong>North-south traffic</strong> — traffic coming in from or going out to the outside world</li>
+</ul>
+<p>Most of your services only need to handle east-west traffic. They should never be directly reachable from the internet. A much smaller number of services — usually just your API gateway or frontend — need to handle north-south traffic.</p>
+<p>Getting confused about which direction you’re dealing with is the root cause of most Kubernetes networking mistakes.</p>
+<hr>
+<h2 id="clusterip--the-default-and-usually-the-right-choice">ClusterIP — The Default, and Usually the Right Choice</h2>
+<p>Every Kubernetes Service gets a stable virtual IP address called a ClusterIP. Traffic to that IP gets load-balanced across healthy pods matching the selector.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#85E89D">apiVersion</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#85E89D">kind</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Service</span></span>
+<span class="line"><span style="color:#85E89D">metadata</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">payments-service</span></span>
+<span class="line"><span style="color:#85E89D">  namespace</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">backend</span></span>
+<span class="line"><span style="color:#85E89D">spec</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  selector</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    app</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">payments</span></span>
+<span class="line"><span style="color:#85E89D">  ports</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">port</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#85E89D">      targetPort</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#85E89D">  type</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">ClusterIP</span><span style="color:#6A737D">  # This is the default — you don't even need to specify it</span></span>
+<span class="line"></span></code></pre>
+<p>That’s it. Any pod in the cluster can now reach your payments service at <code>payments-service.backend.svc.cluster.local:8080</code>. Kubernetes DNS handles the discovery automatically.</p>
+<p><strong>ClusterIP is the right choice for:</strong></p>
+<ul>
+<li>Any service that only needs to be called by other services inside the cluster</li>
+<li>Databases, caches, internal APIs, worker services</li>
+<li>Basically everything that isn’t your public-facing entry point</li>
+</ul>
+<p><strong>The thing people miss:</strong> Services with ClusterIP are completely unreachable from outside the cluster. Not “hard to reach” — unreachable. This is correct and intentional. If you’re debugging why your browser can’t hit a ClusterIP service directly, that’s why.</p>
+<p><strong>Principal Engineer’s take:</strong> If you’re designing a new service and you’re not sure which type to use, start with ClusterIP. It’s the most secure option by default, it has no cost implications, and you can always change it later. The other types are additions to ClusterIP, not replacements.</p>
+<hr>
+<h2 id="nodeport--useful-in-narrow-circumstances">NodePort — Useful in Narrow Circumstances</h2>
+<p>NodePort does what ClusterIP does, plus it opens a specific port (30000-32767) on every node in your cluster. External traffic hitting <code>&#x3C;any-node-ip>:&#x3C;node-port></code> gets forwarded to your service.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#85E89D">apiVersion</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#85E89D">kind</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Service</span></span>
+<span class="line"><span style="color:#85E89D">metadata</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">debug-service</span></span>
+<span class="line"><span style="color:#85E89D">spec</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  selector</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    app</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">my-app</span></span>
+<span class="line"><span style="color:#85E89D">  ports</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">port</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#85E89D">      targetPort</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#85E89D">      nodePort</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">30080</span><span style="color:#6A737D">  # Optional — Kubernetes will assign one if omitted</span></span>
+<span class="line"><span style="color:#85E89D">  type</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">NodePort</span></span>
+<span class="line"></span></code></pre>
+<p><strong>When NodePort actually makes sense:</strong></p>
+<ul>
+<li>Local development clusters (Minikube, kind) where you need to reach a service from your laptop</li>
+<li>On-premises environments where you don’t have a cloud load balancer</li>
+<li>Temporary debugging access that you’re removing once the issue is resolved</li>
+</ul>
+<p><strong>When NodePort is the wrong choice:</strong></p>
+<ul>
+<li>Production cloud environments — use LoadBalancer or Ingress instead</li>
+<li>Anything you’re tempted to leave running permanently</li>
+<li>When you need SSL termination, path-based routing, or any kind of traffic management</li>
+</ul>
+<p><strong>The operational problem with NodePort in production:</strong> You’re now exposed on a high port across every node. Your firewall rules need to account for that. The port range is ugly (<code>:30080</code> in URLs). And you’re bypassing a bunch of useful infrastructure (load balancer health checks, SSL, etc.) that you’ll want in production anyway.</p>
+<p><strong>Principal Engineer’s take:</strong> NodePort is a tool for getting something working quickly, not for designing a production architecture. I’ve seen NodePort used in production exactly once, intentionally — in an air-gapped environment with no cloud provider. Every other time I’ve seen it in production, it was an accident that should have been an Ingress.</p>
+<hr>
+<h2 id="loadbalancer--one-per-service-gets-expensive-fast">LoadBalancer — One Per Service Gets Expensive Fast</h2>
+<p><code>LoadBalancer</code> provisions an actual cloud load balancer (ALB on AWS, Cloud Load Balancer on GCP) and points it at your service. External traffic hits the load balancer, which forwards to your nodes, which forward to your pods.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#85E89D">apiVersion</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#85E89D">kind</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Service</span></span>
+<span class="line"><span style="color:#85E89D">metadata</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">api-gateway</span></span>
+<span class="line"><span style="color:#85E89D">  annotations</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D">    # GCP-specific: use a regional internal load balancer</span></span>
+<span class="line"><span style="color:#85E89D">    cloud.google.com/load-balancer-type</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"Internal"</span></span>
+<span class="line"><span style="color:#85E89D">spec</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  selector</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    app</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">api-gateway</span></span>
+<span class="line"><span style="color:#85E89D">  ports</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">port</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">443</span></span>
+<span class="line"><span style="color:#85E89D">      targetPort</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">8443</span></span>
+<span class="line"><span style="color:#85E89D">  type</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">LoadBalancer</span></span>
+<span class="line"></span></code></pre>
+<p><strong>LoadBalancer is appropriate for:</strong></p>
+<ul>
+<li>A single, well-justified entry point that genuinely needs its own cloud load balancer</li>
+<li>TCP/UDP services that can’t use HTTP-based Ingress routing</li>
+<li>Situations where you need cloud-provider-specific features (GCP’s internal load balancer for private traffic, AWS NLB for low-latency TCP)</li>
+</ul>
+<p><strong>The cost trap:</strong> Each <code>LoadBalancer</code> service provisions a dedicated cloud load balancer. On GCP, that’s around $18/month per load balancer, plus traffic costs. On AWS, ALBs run similarly. Ten services with <code>LoadBalancer</code> type means ten load balancers — before you’ve accounted for traffic costs.</p>
+<p>I’ve seen teams rack up $2,000+ monthly in load balancer costs alone, not because they were doing anything wrong per-service, but because nobody stepped back and asked whether each service needed its own load balancer. Usually it doesn’t.</p>
+<p><strong>Principal Engineer’s take:</strong> <code>LoadBalancer</code> is the right answer for a small number of well-defined entry points. The moment you find yourself creating more than 2-3, stop and ask whether Ingress would solve the same problem more efficiently.</p>
+<hr>
+<h2 id="ingress--the-pattern-you-actually-want-for-http-traffic">Ingress — The Pattern You Actually Want for HTTP Traffic</h2>
+<p>Ingress is a different kind of object — not a Service type, but a separate resource that sits in front of your ClusterIP services and provides HTTP/HTTPS routing.</p>
+<p>One Ingress controller (backed by one load balancer) can route traffic to many different services based on hostname or path.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#85E89D">apiVersion</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">networking.k8s.io/v1</span></span>
+<span class="line"><span style="color:#85E89D">kind</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Ingress</span></span>
+<span class="line"><span style="color:#85E89D">metadata</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">platform-ingress</span></span>
+<span class="line"><span style="color:#85E89D">  annotations</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    nginx.ingress.kubernetes.io/rewrite-target</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">/</span></span>
+<span class="line"><span style="color:#85E89D">    cert-manager.io/cluster-issuer</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"letsencrypt-prod"</span></span>
+<span class="line"><span style="color:#85E89D">spec</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  ingressClassName</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#85E89D">  tls</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">hosts</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">        - </span><span style="color:#9ECBFF">api.chaitanyamaili.in</span></span>
+<span class="line"><span style="color:#E1E4E8">        - </span><span style="color:#9ECBFF">admin.chaitanyamaili.in</span></span>
+<span class="line"><span style="color:#85E89D">      secretName</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">platform-tls</span></span>
+<span class="line"><span style="color:#85E89D">  rules</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">host</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">api.chaitanyamaili.in</span></span>
+<span class="line"><span style="color:#85E89D">      http</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">        paths</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">          - </span><span style="color:#85E89D">path</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">/v1/users</span></span>
+<span class="line"><span style="color:#85E89D">            pathType</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Prefix</span></span>
+<span class="line"><span style="color:#85E89D">            backend</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">              service</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">                name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">users-service</span></span>
+<span class="line"><span style="color:#85E89D">                port</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">                  number</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#E1E4E8">          - </span><span style="color:#85E89D">path</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">/v1/payments</span></span>
+<span class="line"><span style="color:#85E89D">            pathType</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Prefix</span></span>
+<span class="line"><span style="color:#85E89D">            backend</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">              service</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">                name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">payments-service</span></span>
+<span class="line"><span style="color:#85E89D">                port</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">                  number</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">8080</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">host</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">admin.chaitanyamaili.in</span></span>
+<span class="line"><span style="color:#85E89D">      http</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">        paths</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">          - </span><span style="color:#85E89D">path</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">/</span></span>
+<span class="line"><span style="color:#85E89D">            pathType</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Prefix</span></span>
+<span class="line"><span style="color:#85E89D">            backend</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">              service</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">                name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">admin-service</span></span>
+<span class="line"><span style="color:#85E89D">                port</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">                  number</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">3000</span></span>
+<span class="line"></span></code></pre>
+<p>One Ingress. One load balancer behind it. Three services routed to — by host and path — with SSL termination handled at the Ingress level. Compare that to three LoadBalancer services with three load balancers and SSL managed per-service.</p>
+<p><strong>Path-based vs host-based routing:</strong></p>
+<ul>
+<li><strong>Path-based</strong> (<code>/api/users</code>, <code>/api/payments</code>) — useful when you want everything under one domain, differentiated by URL path</li>
+<li><strong>Host-based</strong> (<code>api.example.com</code>, <code>admin.example.com</code>) — cleaner separation, easier to reason about per-service, requires DNS setup per subdomain</li>
+</ul>
+<p>In practice, host-based routing is cleaner at scale. Path-based routing becomes a maintenance problem when paths collide or change.</p>
+<p><strong>Ingress controllers — the choice matters:</strong></p>
+<p>The <code>Ingress</code> resource is a spec; the controller is the implementation. Common choices:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Controller</th><th>Best for</th></tr></thead><tbody><tr><td><strong>nginx-ingress</strong></td><td>General purpose, widely supported, good defaults</td></tr><tr><td><strong>AWS Load Balancer Controller</strong></td><td>Native ALB/NLB integration on AWS</td></tr><tr><td><strong>GKE Ingress / GCP GLB</strong></td><td>Native integration on GCP, global load balancing</td></tr><tr><td><strong>Traefik</strong></td><td>Dynamic config, good for microservices-heavy setups</td></tr><tr><td><strong>Istio Gateway</strong></td><td>When you’re already running Istio</td></tr></tbody></table>
+<p>Pick based on your cloud provider and existing infrastructure, not based on which has the most GitHub stars.</p>
+<p><strong>Principal Engineer’s take:</strong> For most teams, the right architecture is: one Ingress controller per cluster (sometimes one per environment), all HTTP/S services behind it using ClusterIP, with SSL terminated at the Ingress. This keeps costs predictable, centralises your entry-point configuration, and gives you one place to add authentication, rate limiting, and logging. If you catch yourself creating many Ingress resources for the same cluster, consolidate them — it gets unwieldy fast.</p>
+<hr>
+<h2 id="service-mesh--when-the-complexity-is-worth-it">Service Mesh — When the Complexity Is Worth It</h2>
+<p>A service mesh (Istio, Linkerd) adds a sidecar proxy to every pod that intercepts all network traffic. This gives you mTLS between services, fine-grained traffic management, distributed tracing, and circuit breaking — without changing application code.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D"># With Istio installed, this VirtualService gives you</span></span>
+<span class="line"><span style="color:#6A737D"># traffic splitting between two versions of a service</span></span>
+<span class="line"><span style="color:#85E89D">apiVersion</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">networking.istio.io/v1alpha3</span></span>
+<span class="line"><span style="color:#85E89D">kind</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">VirtualService</span></span>
+<span class="line"><span style="color:#85E89D">metadata</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">payments-routing</span></span>
+<span class="line"><span style="color:#85E89D">spec</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  hosts</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#9ECBFF">payments-service</span></span>
+<span class="line"><span style="color:#85E89D">  http</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">match</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">        - </span><span style="color:#85E89D">headers</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">            x-canary</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">              exact</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"true"</span></span>
+<span class="line"><span style="color:#85E89D">      route</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">        - </span><span style="color:#85E89D">destination</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">            host</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">payments-service</span></span>
+<span class="line"><span style="color:#85E89D">            subset</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">v2</span></span>
+<span class="line"><span style="color:#E1E4E8">    - </span><span style="color:#85E89D">route</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">        - </span><span style="color:#85E89D">destination</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">            host</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">payments-service</span></span>
+<span class="line"><span style="color:#85E89D">            subset</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#85E89D">          weight</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">90</span></span>
+<span class="line"><span style="color:#E1E4E8">        - </span><span style="color:#85E89D">destination</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">            host</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">payments-service</span></span>
+<span class="line"><span style="color:#85E89D">            subset</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">v2</span></span>
+<span class="line"><span style="color:#85E89D">          weight</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">10</span></span>
+<span class="line"></span></code></pre>
+<p>That’s canary traffic splitting — 10% of traffic to v2, 90% to v1, with header-based override for testing. Doing this without a service mesh would require significant application changes or a custom proxy setup.</p>
+<p><strong>When a service mesh is worth the operational cost:</strong></p>
+<ul>
+<li>You have strict security requirements and need verifiable mTLS between every service</li>
+<li>You need fine-grained traffic management (canary, A/B, circuit breaking) without application-level changes</li>
+<li>You have many services and observability is becoming a real problem</li>
+</ul>
+<p><strong>When it’s overkill:</strong></p>
+<ul>
+<li>You have fewer than ~10 services</li>
+<li>Your team is still figuring out basic Kubernetes operations</li>
+<li>You’re running a monolith that you’ve containerised but haven’t broken into microservices yet</li>
+</ul>
+<p>The honest truth about service meshes: they add significant operational complexity. Istio, in particular, has a steep learning curve, adds resource overhead (every pod gets a sidecar), and when it breaks, it can break in ways that are genuinely hard to debug. Linkerd is lighter and simpler, but still an additional system to operate and upgrade.</p>
+<p>Don’t adopt a service mesh because it sounds like what mature engineering organizations do. Adopt it because you have a specific problem it solves — mTLS at scale, fine-grained traffic control, deep observability — that you can’t solve more simply.</p>
+<p><strong>Principal Engineer’s take:</strong> I’d put the threshold at roughly 15-20 services with real security or traffic management requirements before a service mesh starts paying for itself operationally. Below that, a well-configured Ingress with network policies and application-level instrumentation will take you further with less operational risk.</p>
+<hr>
+<h2 id="the-decision-framework">The Decision Framework</h2>
+<p>Here’s the actual flowchart I use:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Does this service need to be reachable from outside the cluster?</span></span>
+<span class="line"><span>│</span></span>
+<span class="line"><span>├── No → ClusterIP. Done.</span></span>
+<span class="line"><span>│</span></span>
+<span class="line"><span>└── Yes → Is it HTTP/HTTPS?</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    ├── Yes → Use Ingress with a ClusterIP backend.</span></span>
+<span class="line"><span>    │         Add to an existing Ingress if one exists.</span></span>
+<span class="line"><span>    │         Create a new one only if there's a strong reason.</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    └── No (TCP/UDP, or needs cloud-specific LB features)</span></span>
+<span class="line"><span>        └── LoadBalancer. One per entry point, not one per service.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Do you need mTLS, fine-grained traffic management, or deep observability?</span></span>
+<span class="line"><span>├── No → Network Policies + Ingress is sufficient.</span></span>
+<span class="line"><span>└── Yes → Consider a service mesh. But do it deliberately, not by default.</span></span>
+<span class="line"><span></span></span></code></pre>
+<hr>
+<h2 id="practice">Practice</h2>
+<ul>
+<li><a href="https://killercoda.com/course/cka">KillerCoda CKA Course</a> — includes dedicated Ingress and Service networking scenarios</li>
+<li><a href="https://killercoda.com/cka">Free CKA Scenarios</a> — pick the networking section; the hands-on time with Ingress configuration is invaluable</li>
+<li><a href="https://kodekloud.com/courses/certified-kubernetes-administrator-cka/">KodeKloud Kubernetes Networking</a> — the Services and Networking section of the CKA course covers this in depth</li>
+</ul>
+<p>Build an Ingress that routes two paths to two different services. Add TLS. Break it deliberately and debug it. That exercise will teach you more than reading any blog post (including this one).</p>
+<hr>
+<p><strong>Next in the series:</strong> Resilience Patterns — liveness vs readiness vs startup probes (most teams configure these wrong), resource limits as a design decision, and what happens at scale when you get any of it wrong.</p>
+<p><em>Something I got wrong, or a pattern that deserves more coverage? Find me on <a href="https://www.linkedin.com/in/chaitanyamaili/">LinkedIn</a>.</em></p>  </div> </article>  </main> <footer class="border-t border-border mt-20"> <div class="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground"> <span>© 2026 Chaitanya Maili</span> <div class="flex items-center gap-4"> <a href="https://chaitanyamaili.in" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">Portfolio</a> <a href="https://www.linkedin.com/in/chaitanyamaili/" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">LinkedIn</a> <a href="https://github.com/chaitanyamaili" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">GitHub</a> </div> </div> </footer> </body></html>
