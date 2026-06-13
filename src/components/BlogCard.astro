@@ -6,7 +6,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { title, description, pubDate, tags, readingTime } = post.data;
+const { title, description, pubDate, tags, readingTime, series, seriesPart } = post.data;
 const base = import.meta.env.BASE_URL;
 
 const formattedDate = new Intl.DateTimeFormat('en-US', {
@@ -20,6 +20,18 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
   href={`${base}/blog/${post.slug}`}
   class="group block p-6 rounded-lg border border-border bg-card shadow-md hover:shadow-lg transition-shadow duration-300"
 >
+  {series && seriesPart && (
+    <div class="flex items-center gap-2 mb-3">
+      <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>
+        </svg>
+        Series
+      </span>
+      <span class="text-xs text-muted-foreground">{series} · Part {seriesPart}</span>
+    </div>
+  )}
+
   <div class="flex items-start justify-between gap-4 mb-2">
     <h2 class="text-xl font-semibold text-foreground group-hover:underline underline-offset-4 decoration-muted-foreground leading-snug">
       {title}
