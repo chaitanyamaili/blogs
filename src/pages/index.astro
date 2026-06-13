@@ -1,14 +1,32 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BlogCard from '../components/BlogCard.astro';
+import SeriesCard from '../components/SeriesCard.astro';
 import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Split into series posts and standalone posts
+const seriesPosts = allPosts.filter((p) => p.data.series);
+const standalonePosts = allPosts.filter((p) => !p.data.series);
+
+// Group series posts by series name
+const seriesMap = seriesPosts.reduce<Record<string, typeof seriesPosts>>(
+  (acc, post) => {
+    const name = post.data.series!;
+    if (!acc[name]) acc[name] = [];
+    acc[name].push(post);
+    return acc;
+  },
+  {}
+);
 ---
 
 <BaseLayout title="Chaitanya Maili — Writing">
-  <div class="space-y-10">
+  <div class="space-y-14">
+
+    <!-- Page header -->
     <div>
       <h1 class="text-2xl font-bold tracking-tight mb-2">Writing</h1>
       <p class="text-muted-foreground">
@@ -16,14 +34,39 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
       </p>
     </div>
 
-    {posts.length === 0 ? (
-      <p class="text-muted-foreground text-sm">No posts yet. Check back soon.</p>
-    ) : (
-      <div class="space-y-4">
-        {posts.map((post) => (
-          <BlogCard post={post} />
-        ))}
-      </div>
+    <!-- Series section -->
+    {Object.keys(seriesMap).length > 0 && (
+      <section>
+        <div class="flex items-center gap-3 mb-5">
+          <h2 class="text-base font-semibold text-foreground tracking-tight">Series</h2>
+          <div class="flex-1 h-px bg-border" />
+        </div>
+        <div class="space-y-5">
+          {Object.entries(seriesMap).map(([name, posts]) => (
+            <SeriesCard seriesName={name} posts={posts} />
+          ))}
+        </div>
+      </section>
     )}
+
+    <!-- Standalone posts section -->
+    {standalonePosts.length > 0 && (
+      <section>
+        <div class="flex items-center gap-3 mb-5">
+          <h2 class="text-base font-semibold text-foreground tracking-tight">Posts</h2>
+          <div class="flex-1 h-px bg-border" />
+        </div>
+        <div class="space-y-4">
+          {standalonePosts.map((post) => (
+            <BlogCard post={post} />
+          ))}
+        </div>
+      </section>
+    )}
+
+    {allPosts.length === 0 && (
+      <p class="text-muted-foreground text-sm">No posts yet. Check back soon.</p>
+    )}
+
   </div>
 </BaseLayout>

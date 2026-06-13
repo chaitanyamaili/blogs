@@ -4,6 +4,8 @@ description: "Sidecar, Init Container, Ambassador, Adapter — not as definition
 pubDate: 2026-06-13
 tags: ["kubernetes", "platform engineering", "cloud-native", "golang"]
 readingTime: 12
+series: "Kubernetes Design Patterns"
+seriesPart: 1
 ---
 
 Most Kubernetes tutorials teach you what a sidecar is. Fewer explain when you'd actually reach for one — and almost none tell you when you shouldn't.

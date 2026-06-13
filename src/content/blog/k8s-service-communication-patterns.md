@@ -4,6 +4,8 @@ description: "ClusterIP, NodePort, LoadBalancer, Ingress, service mesh — not a
 pubDate: 2026-06-14
 tags: ["kubernetes", "platform engineering", "cloud-native", "networking"]
 readingTime: 13
+series: "Kubernetes Design Patterns"
+seriesPart: 2
 ---
 
 Here's a conversation I've had more times than I can count:
