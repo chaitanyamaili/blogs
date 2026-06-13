@@ -148,6 +148,13 @@ declare module 'astro:content' {
   collection: "blog";
   data: InferEntrySchema<"blog">
 } & { render(): Render[".md"] };
+"genai-how-llms-work.md": {
+	id: "genai-how-llms-work.md";
+  slug: "genai-how-llms-work";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
 "k8s-pod-design-patterns.md": {
 	id: "k8s-pod-design-patterns.md";
   slug: "k8s-pod-design-patterns";
@@ -158,6 +165,13 @@ declare module 'astro:content' {
 "k8s-service-communication-patterns.md": {
 	id: "k8s-service-communication-patterns.md";
   slug: "k8s-service-communication-patterns";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"oss-vs-closed-llms-landscape.md": {
+	id: "oss-vs-closed-llms-landscape.md";
+  slug: "oss-vs-closed-llms-landscape";
   body: string;
   collection: "blog";
   data: InferEntrySchema<"blog">

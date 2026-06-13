@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="GPT-4o, Claude, Gemini, Llama, Mistral, Qwen — not as a spec sheet, but as a decision space with real trade-offs. Part 1 of Open Source vs Closed LLMs."><meta property="og:title" content="The LLM Landscape in 2026: What You're Actually Choosing Between — Chaitanya Maili"><meta property="og:description" content="GPT-4o, Claude, Gemini, Llama, Mistral, Qwen — not as a spec sheet, but as a decision space with real trade-offs. Part 1 of Open Source vs Closed LLMs."><meta property="og:type" content="website"><link rel="icon" type="image/svg+xml" href="/blogsfavicon.svg"><link rel="icon" type="image/png" sizes="96x96" href="/blogsfavicon-96x96.png"><link rel="shortcut icon" href="/blogsfavicon.ico"><title>The LLM Landscape in 2026: What You&#39;re Actually Choosing Between — Chaitanya Maili</title><!-- Prevent flash of wrong theme — matches chaitanyamaili.in behaviour --><script>
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    </script><link rel="stylesheet" href="/blogs/_astro/_slug_.CRuXPGCC.css"><script type="module" src="/blogs/_astro/hoisted.D0mFuee3.js"></script></head> <body class="min-h-screen flex flex-col"> <header class="border-b border-border bg-background"> <div class="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between"> <a href="/blogs/" class="flex flex-col"> <span class="font-semibold text-foreground tracking-tight">Chaitanya Maili</span> <span class="text-xs text-muted-foreground">Thinking through the hard parts of engineering, out loud.</span> </a> <nav class="flex items-center gap-5"> <a href="https://chaitanyamaili.in" target="_blank" rel="noopener noreferrer" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+Portfolio ↗
+</a> <button id="theme-toggle" aria-label="Toggle dark mode" class="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"> <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden dark:block"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path> </svg> <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="block dark:hidden"> <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path> </svg> </button> </nav> </div> </header>  <main class="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">  <article> <header class="mb-10"> <!-- Back link --> <a href="/blogs/" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"> <path d="m15 18-6-6 6-6"></path> </svg>
+All posts
+</a> <!-- Series breadcrumb --> <div class="flex items-center gap-2 mb-4"> <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20"> <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"> <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"></path> </svg>
+Series
+</span> <span class="text-sm text-muted-foreground"> Open Source vs Closed LLMs · Part 1 of 1 </span> </div> <h1 class="text-3xl font-bold tracking-tight mb-4">The LLM Landscape in 2026: What You&#39;re Actually Choosing Between</h1> <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"> <time datetime="2026-06-13T00:00:00.000Z">June 13, 2026</time>  <span aria-hidden="true">·</span> <span>12 min read</span>  </div> <div class="flex flex-wrap gap-2 mt-4"> <span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> ai </span><span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> llm </span><span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> open source </span><span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border"> platform engineering </span> </div> </header> <div class="prose prose-neutral dark:prose-invert max-w-none">  <p>Six months ago I had to make a real decision: which LLM to use as the backbone of a new internal tool at Pantheon. Not in a demo. Not in a prototype. In something that would handle real traffic, process internal data, and need to stay reliable as the underlying models evolved.</p>
+<p>I spent a week reading benchmarks. They were nearly useless.</p>
+<p>Not because benchmarks are wrong — they’re measuring something — but because they measure the wrong things for most production use cases. MMLU tells you how a model performs on multiple-choice academic questions. My tool needed to parse infrastructure configs and explain them to engineers. Those are different problems.</p>
+<p>What I actually needed was a mental model for navigating the LLM landscape — not a ranking, but a framework for making the decision in context.</p>
+<p>This is Part 1 of Open Source vs Closed LLMs: An Engineer’s Decision Guide. We’re going to map the terrain so the rest of the series has something to push against.</p>
+<hr>
+<h2 id="the-two-camps-and-why-open-source-is-complicated">The Two Camps (And Why “Open Source” Is Complicated)</h2>
+<p>The common framing is: closed models from big companies vs. open-source models from the community. The reality is messier.</p>
+<p><strong>Closed models</strong> are accessed exclusively via API. You send a request, you get a response, you pay per token. You never see the weights. You can’t run them yourself. OpenAI’s GPT series, Anthropic’s Claude, and Google’s Gemini are the main players.</p>
+<p><strong>Open-weight models</strong> (often called “open source,” though the distinction matters) are models where the weights are publicly available. You can download and run them yourself, or use managed hosting. Meta’s Llama series, Mistral’s models, Alibaba’s Qwen, and Microsoft’s Phi are the prominent examples.</p>
+<p>The “open source” label is worth scrutinising. Most of these models have:</p>
+<ul>
+<li>Publicly available weights ✓</li>
+<li>Published architecture details ✓</li>
+<li>Training data that is <em>not</em> fully disclosed ✗</li>
+<li>Licences that restrict commercial use in some cases ✗</li>
+</ul>
+<p>Llama 3’s licence, for example, restricts use by companies with more than 700 million monthly active users — which matters to almost nobody, but it’s not truly open in the FSF sense. Mistral’s models are generally more permissively licensed. This matters if you’re building a commercial product and need to think about compliance.</p>
+<p>When I say “open” in this series, I mean open-weight: the weights are available and you can run them. That’s the meaningful distinction for most engineering decisions.</p>
+<hr>
+<h2 id="the-closed-model-tier">The Closed Model Tier</h2>
+<p>These are the models you access via API, pay per token, and trust to be maintained and improved by someone else.</p>
+<p><strong>OpenAI: GPT-4o and the o-series</strong></p>
+<p>GPT-4o is the current flagship — multimodal (text, image, audio), fast, with a 128K context window. The <code>o1</code> and <code>o3</code> models in the reasoning series trade speed for substantially better performance on complex multi-step problems: coding challenges, mathematical reasoning, planning tasks.</p>
+<p>Where GPT-4o genuinely excels: code generation, instruction following, structured output, and tasks where you need consistent quality at scale. The API is mature, the documentation is good, and the ecosystem of tooling (LangChain, LlamaIndex, etc.) is built around OpenAI’s interface.</p>
+<p>Where it struggles: it’s expensive at high volume. As of mid-2026, GPT-4o input tokens cost around $5/million, output around $15/million. For a high-throughput production system, that arithmetic gets uncomfortable fast. The <code>gpt-4o-mini</code> variant is dramatically cheaper and handles a surprising amount of production workloads well — but you need to benchmark it for your task specifically, because the quality gap is real on complex reasoning.</p>
+<p><strong>Anthropic: Claude 3.5 and Claude 4</strong></p>
+<p>Claude models have earned a reputation for being particularly good at following nuanced instructions, handling long documents, and producing natural-sounding prose. The 200K context window is genuinely useful — not just a marketing number — for document-heavy use cases.</p>
+<p>What I’ve noticed using Claude: it’s more likely to acknowledge uncertainty and push back on unclear requests rather than confidently hallucinating an answer. Whether that’s better depends on your use case. For a user-facing chatbot, a model that says “I’m not sure” is often better than one that confidently makes something up. For an extraction pipeline where you need a definitive output, it can be frustrating.</p>
+<p>Claude’s pricing is in the same range as GPT-4o at the top tier. The Haiku models offer a cheaper, faster option that’s competitive with <code>gpt-4o-mini</code>.</p>
+<p><strong>Google: Gemini 1.5 Pro and Gemini 2</strong></p>
+<p>Gemini’s headline feature is context: 1M token context window on the Pro model, and early access to 2M tokens. This is genuinely a different capability class for certain use cases — processing an entire codebase, analysing long video transcripts, or doing deep document analysis that would require chunking on other models.</p>
+<p>The trade-off: Gemini has historically been less consistent at instruction following than OpenAI or Anthropic’s flagship models, though this has improved significantly. The 1M context window is also expensive — you pay for tokens even if the model doesn’t use all of them effectively.</p>
+<p>Google’s integration story is strong if you’re already on GCP. Vertex AI gives you Gemini access with enterprise controls, data residency options, and tight integration with the rest of the Google Cloud stack. If you’re running on GCP, this is worth evaluating seriously.</p>
+<hr>
+<h2 id="the-open-weight-tier">The Open-Weight Tier</h2>
+<p>These are models where you have the weights, can run them yourself, and aren’t dependent on a vendor’s API.</p>
+<p><strong>Meta: Llama 3 and Llama 3.1</strong></p>
+<p>Llama 3 changed the landscape when it dropped. The 70B parameter model performs competitively with closed models that were considered state-of-the-art a year earlier. Llama 3.1 added longer context windows (128K) and meaningfully improved reasoning.</p>
+<p>What Llama gives you: a highly capable base model you can run on your own infrastructure, fine-tune on your own data, and deploy without per-token API costs. The 8B model runs comfortably on a single A100 and handles a wide range of production tasks. The 70B model needs more serious hardware but delivers quality that’s hard to distinguish from closed models on many tasks.</p>
+<p>The practical catch: “running it yourself” is doing a lot of work in that sentence. You need GPU infrastructure, you need to manage serving (vLLM, llama.cpp, or similar), you need to handle scaling, and you need someone who knows what they’re doing when things go wrong. More on this in Part 3.</p>
+<p><strong>Mistral: Mistral 7B, Mixtral 8x7B, Mistral Large</strong></p>
+<p>Mistral AI has consistently punched above their model size. Mistral 7B was the first model that genuinely made people rethink the assumption that bigger is always better — it outperformed models twice its size on several benchmarks.</p>
+<p>Mixtral 8x7B introduced a Mixture-of-Experts architecture that uses only a subset of parameters per forward pass — giving you the quality of a larger model with the inference cost of a smaller one. For production deployments where you want to maximise quality-per-dollar on your own hardware, Mixtral is worth serious consideration.</p>
+<p>Mistral also offers managed API access via <code>api.mistral.ai</code>, which is notably cheaper than OpenAI or Anthropic at comparable quality tiers. If you want open-weight quality without the infrastructure burden, their hosted API is an underrated option.</p>
+<p><strong>Alibaba: Qwen 2.5</strong></p>
+<p>Qwen (pronounced “chwen”) came out of Alibaba’s research and has become one of the most capable open-weight model families available. Qwen 2.5 — particularly the 72B model — performs at or near Llama 3.1 70B quality and, in some benchmarks, edges ahead.</p>
+<p>What makes Qwen interesting beyond the benchmark numbers: strong multilingual performance, particularly for Asian languages. If you’re building for a global audience or need reliable Chinese/Japanese/Korean capabilities, Qwen is worth evaluating seriously — it’s not an afterthought on those languages the way some Western-developed models are.</p>
+<p>The licence is Apache 2.0 on most sizes, which is about as permissive as it gets.</p>
+<p><strong>Microsoft: Phi-3 and Phi-4</strong></p>
+<p>The Phi series is Microsoft’s bet on small but capable models. Phi-3 Mini (3.8B parameters) fits in constrained environments — edge devices, on-device inference, services where you want sub-second latency without GPU infrastructure. The quality for its size is remarkable.</p>
+<p>Phi-4 (14B) pushes further into “genuinely useful for production tasks at small scale.” If you’re building something that needs to run on a laptop, a mobile device, or a small VPS, Phi is the model family to watch.</p>
+<hr>
+<h2 id="the-dimensions-that-actually-matter">The Dimensions That Actually Matter</h2>
+<p>Here’s a comparison across the dimensions I actually use when making decisions — not benchmark scores:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model</th><th>Context</th><th>Approximate Cost</th><th>Self-hostable</th><th>Best for</th></tr></thead><tbody><tr><td>GPT-4o</td><td>128K</td><td>$$$$</td><td>No</td><td>General production, code, structured output</td></tr><tr><td>GPT-4o mini</td><td>128K</td><td>$$</td><td>No</td><td>High-volume, cost-sensitive tasks</td></tr><tr><td>Claude Sonnet 3.5</td><td>200K</td><td>$$$$</td><td>No</td><td>Long documents, nuanced instruction following</td></tr><tr><td>Claude Haiku</td><td>200K</td><td>$$</td><td>No</td><td>Fast, affordable Claude-quality output</td></tr><tr><td>Gemini 1.5 Pro</td><td>1M</td><td>$$$$</td><td>No</td><td>Massive context, GCP integration</td></tr><tr><td>Llama 3.1 70B</td><td>128K</td><td>Infrastructure cost</td><td>Yes</td><td>Privacy, fine-tuning, cost at volume</td></tr><tr><td>Llama 3.1 8B</td><td>128K</td><td>Infrastructure cost</td><td>Yes</td><td>Edge of what a small model can do</td></tr><tr><td>Mixtral 8x7B</td><td>32K</td><td>Infrastructure cost</td><td>Yes</td><td>Quality-per-compute on own infra</td></tr><tr><td>Qwen 2.5 72B</td><td>128K</td><td>Infrastructure cost</td><td>Yes</td><td>Multilingual, competitive quality</td></tr><tr><td>Phi-4 14B</td><td>16K</td><td>Infrastructure cost</td><td>Yes</td><td>Edge/constrained environments</td></tr></tbody></table>
+<hr>
+<h2 id="what-open-source-actually-costs-you">What “Open Source” Actually Costs You</h2>
+<p>The pitch for open models is: no per-token cost, data stays on your infrastructure, full control. All true. Here’s what the pitch leaves out:</p>
+<p><strong>GPU infrastructure is not free.</strong> An A100 80GB GPU on AWS costs around $3.20/hour on-demand, or roughly $2,300/month if you need it running continuously. A Llama 3.1 70B deployment with reasonable throughput needs multiple A100s. The break-even point against API costs depends heavily on your traffic volume — but at low to medium volume, the API is often cheaper when you factor in engineering time.</p>
+<p><strong>You own the ops.</strong> Model updates, serving infrastructure, scaling, latency optimisation, failure handling — that’s now your team’s problem. Closed API providers absorb this. With open models, you’re running a service. That’s not insurmountable, but it’s not free either.</p>
+<p><strong>Fine-tuning is non-trivial.</strong> The ability to fine-tune is a real advantage of open models. Actually doing it well — collecting training data, running QLoRA fine-tuning, evaluating the result, deploying without regression — requires expertise and time that’s easy to underestimate.</p>
+<p>I’m not saying open models aren’t worth it. For the right use cases (privacy requirements, high volume, specific domain fine-tuning), they’re clearly the better choice. But the TCO analysis needs to be honest. We’ll go deep on the numbers in Part 6.</p>
+<hr>
+<h2 id="the-gap-is-closing-and-that-changes-the-decision">The Gap Is Closing, and That Changes the Decision</h2>
+<p>Eighteen months ago, the quality gap between closed models and open models was significant. GPT-4 was meaningfully better than anything you could run yourself at reasonable cost.</p>
+<p>That gap has narrowed substantially. Llama 3.1 70B and Qwen 2.5 72B are competitive with GPT-3.5-class models across most tasks, and they’re closing on GPT-4-class on many. The trajectory is clear: open-weight model quality is improving faster than closed model quality is pulling ahead.</p>
+<p>This changes the decision calculus. A year ago, “I need the best possible quality” reliably pointed to closed models. Today, it’s more nuanced — and a year from now, the quality argument for closed models may be even weaker.</p>
+<p>What remains as durable advantages for closed models: frontier capabilities at the absolute cutting edge, no infrastructure burden, and built-in enterprise features (audit logging, data processing agreements, SLA guarantees). For open models: cost at volume, data privacy, customisation via fine-tuning.</p>
+<hr>
+<p><strong>Next in the series:</strong> Benchmarks vs. Reality — why MMLU, HumanEval, and MMMU scores don’t predict how a model will perform on your specific task, and how to actually evaluate models for your use case.</p>
+<p><em>Disagree with my take on any of these models? I’d genuinely like to hear it — find me on <a href="https://www.linkedin.com/in/chaitanyamaili/">LinkedIn</a>.</em></p>  </div> <!-- Share panel --> <div class="mt-12"> <div class="share-panel flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border border-border bg-muted/30"> <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">Share this post</span> <div class="flex items-center gap-2 flex-wrap"> <!-- Twitter / X --> <a href="https://twitter.com/intent/tweet?text=The%20LLM%20Landscape%20in%202026%3A%20What%20You're%20Actually%20Choosing%20Between&url=https%3A%2F%2Fchaitanyamaili.in%2Fblogs%2Fblog%2Foss-vs-closed-llms-landscape&via=chaitanyamaili" target="_blank" rel="noopener noreferrer" aria-label="Share on X (Twitter)" class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"> <!-- X logo --> <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"> <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path> </svg>
+X
+</a> <!-- LinkedIn --> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fchaitanyamaili.in%2Fblogs%2Fblog%2Foss-vs-closed-llms-landscape" target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn" class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"> <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"> <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path> </svg>
+LinkedIn
+</a> <!-- Copy link --> <button id="copy-link-btn" data-url="https://chaitanyamaili.in/blogs/blog/oss-vs-closed-llms-landscape" aria-label="Copy link" class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors cursor-pointer"> <!-- Link icon (default) --> <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path> </svg> <!-- Check icon (after copy) --> <svg id="check-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden text-green-500"> <path d="M20 6 9 17l-5-5"></path> </svg> <span id="copy-label">Copy link</span> </button> </div> </div>  </div> <!-- Series navigation -->  </article>  </main> <footer class="border-t border-border mt-20"> <div class="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground"> <span>© 2026 Chaitanya Maili</span> <div class="flex items-center gap-4"> <a href="https://chaitanyamaili.in" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">Portfolio</a> <a href="https://www.linkedin.com/in/chaitanyamaili/" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">LinkedIn</a> <a href="https://github.com/chaitanyamaili" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">GitHub</a> </div> </div> </footer> </body></html>
