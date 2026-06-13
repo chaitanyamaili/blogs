@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SharePanel from '../../components/SharePanel.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog', ({ data }) => !data.draft && !!data.series);
+
+  // Group by series name, build slug from name
+  const seriesMap = allPosts.reduce<Record<string, typeof allPosts>>((acc, post) => {
+    const name = post.data.series!;
+    if (!acc[name]) acc[name] = [];
+    acc[name].push(post);
+    return acc;
+  }, {});
+
+  return Object.entries(seriesMap).map(([name, posts]) => ({
+    params: {
+      slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+    },
+    props: { seriesName: name, posts },
+  }));
+}
+
+interface Props {
+  seriesName: string;
+  posts: any[];
+}
+
+const { seriesName, posts } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const seriesSlugLocal = seriesName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+const pageUrl = new URL(`${base}/series/${seriesSlugLocal}`, Astro.site ?? 'https://chaitanyamaili.in').toString();
+
+const sortedPosts = [...posts].sort(
+  (a, b) => (a.data.seriesPart ?? 0) - (b.data.seriesPart ?? 0)
+);
+
+const totalParts = sortedPosts.length;
+const allTags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))];
+const totalReadingTime = sortedPosts.reduce((sum, p) => sum + (p.data.readingTime ?? 0), 0);
+---
+
+<BaseLayout title={`${seriesName} — Chaitanya Maili`} description={`A ${totalParts}-part series on ${seriesName}`}>
+  <div class="space-y-10">
+
+    <!-- Back link -->
+    <a
+      href={`${base}/`}
+      class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+      All posts
+    </a>
+
+    <!-- Series header -->
+    <header class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>
+          </svg>
+          Series
+        </span>
+      </div>
+
+      <h1 class="text-3xl font-bold tracking-tight">{seriesName}</h1>
+
+      <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+        <span>{totalParts} parts published</span>
+        <span aria-hidden="true">·</span>
+        <span>~{totalReadingTime} min total reading time</span>
+      </div>
+
+      {allTags.length > 0 && (
+        <div class="flex flex-wrap gap-1.5">
+          {allTags.map((tag: string) => (
+            <span class="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <!-- Share panel -->
+    <SharePanel title={seriesName} url={pageUrl} label="Share this series" />
+
+    <!-- Post list -->
+    <section>
+      <ol class="space-y-4">
+        {sortedPosts.map((post) => {
+          const formattedDate = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }).format(post.data.pubDate);
+
+          return (
+            <li>
+              <a
+                href={`${base}/blog/${post.slug}`}
+                class="group flex gap-5 p-5 rounded-lg border border-border bg-card shadow-md hover:shadow-lg transition-shadow duration-300"
+              >
+                <!-- Part number -->
+                <div class="flex-shrink-0 flex flex-col items-center">
+                  <span class="w-9 h-9 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-bold text-muted-foreground group-hover:border-primary/40 group-hover:text-primary transition-colors">
+                    {post.data.seriesPart}
+                  </span>
+                  {post !== sortedPosts[sortedPosts.length - 1] && (
+                    <div class="flex-1 w-px bg-border mt-2" />
+                  )}
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0 pb-1">
+                  <h2 class="text-base font-semibold text-foreground group-hover:underline underline-offset-4 decoration-muted-foreground leading-snug mb-1">
+                    {post.data.title}
+                  </h2>
+                  <p class="text-sm text-muted-foreground leading-relaxed mb-3">
+                    {post.data.description}
+                  </p>
+                  <div class="flex items-center gap-3 text-xs text-muted-foreground">
+                    <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+                    {post.data.readingTime && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span>{post.data.readingTime} min read</span>
+                      </>
+                    )}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                      <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+
+  </div>
+</BaseLayout>

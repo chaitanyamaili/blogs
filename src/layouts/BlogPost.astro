@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import SharePanel from '../components/SharePanel.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
@@ -10,6 +11,7 @@ interface Props {
 const { post } = Astro.props;
 const { title, description, pubDate, tags, readingTime, series, seriesPart } = post.data;
 const base = import.meta.env.BASE_URL;
+const pageUrl = new URL(`${base}/blog/${post.slug}`, Astro.site ?? 'https://chaitanyamaili.in').toString();
 
 const formattedDate = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -82,6 +84,11 @@ const nextPost = seriesSiblings.find((p) => p.data.seriesPart === (seriesPart ??
 
     <div class="prose prose-neutral dark:prose-invert max-w-none">
       <slot />
+    </div>
+
+    <!-- Share panel -->
+    <div class="mt-12">
+      <SharePanel title={title} url={pageUrl} />
     </div>
 
     <!-- Series navigation -->
