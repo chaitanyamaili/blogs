@@ -107,3 +107,81 @@ const seriesMap = seriesPosts.reduce<Record<string, typeof seriesPosts>>(
 
   </div>
 </BaseLayout>
+
+<script define:vars={{ base: import.meta.env.BASE_URL }}>
+  const input = document.getElementById('search-input');
+  const resultsEl = document.getElementById('search-results');
+  const emptyEl = document.getElementById('search-empty');
+  const emptyQuery = document.getElementById('search-empty-query');
+  const postList = document.getElementById('post-list');
+
+  let pagefind = null;
+
+  async function loadPagefind() {
+    if (pagefind) return pagefind;
+    try {
+      pagefind = await import(`${base}pagefind/pagefind.js`);
+      await pagefind.options({ excerptLength: 20 });
+    } catch {
+      pagefind = null;
+    }
+    return pagefind;
+  }
+
+  function showList() {
+    postList.classList.remove('hidden');
+    resultsEl.classList.add('hidden');
+    emptyEl.classList.add('hidden');
+    resultsEl.innerHTML = '';
+  }
+
+  function renderResult(result) {
+    const url = result.url;
+    const title = result.meta?.title ?? 'Untitled';
+    const excerpt = result.excerpt ?? '';
+
+    const card = document.createElement('a');
+    card.href = url;
+    card.className =
+      'group block p-5 rounded-lg border border-border bg-card shadow-md hover:shadow-lg transition-shadow duration-300';
+    card.innerHTML = `
+      <h2 class="text-base font-semibold text-foreground group-hover:underline underline-offset-4 decoration-muted-foreground leading-snug mb-1.5">
+        ${title}
+      </h2>
+      ${excerpt ? `<p class="text-sm text-muted-foreground leading-relaxed">${excerpt}</p>` : ''}
+    `;
+    return card;
+  }
+
+  input?.addEventListener('input', async (e) => {
+    const query = e.target.value.trim();
+
+    if (!query) {
+      showList();
+      return;
+    }
+
+    const pf = await loadPagefind();
+    if (!pf) {
+      showList();
+      return;
+    }
+
+    const search = await pf.search(query);
+    const results = await Promise.all(search.results.map((r) => r.data()));
+
+    postList.classList.add('hidden');
+    resultsEl.innerHTML = '';
+
+    if (results.length === 0) {
+      resultsEl.classList.add('hidden');
+      emptyEl.classList.remove('hidden');
+      emptyQuery.textContent = query;
+      return;
+    }
+
+    emptyEl.classList.add('hidden');
+    resultsEl.classList.remove('hidden');
+    results.forEach((r) => resultsEl.appendChild(renderResult(r)));
+  });
+</script>
