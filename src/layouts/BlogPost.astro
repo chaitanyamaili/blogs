@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import SharePanel from '../components/SharePanel.astro';
+import AuthorCard from '../components/AuthorCard.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
@@ -86,8 +87,11 @@ const nextPost = seriesSiblings.find((p) => p.data.seriesPart === (seriesPart ??
       <slot />
     </div>
 
+    <!-- Author card -->
+    <AuthorCard />
+
     <!-- Share panel -->
-    <div class="mt-12">
+    <div class="mt-8">
       <SharePanel title={title} url={pageUrl} />
     </div>
 

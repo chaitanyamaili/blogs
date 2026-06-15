@@ -27,8 +27,15 @@ interface Props {
   posts: any[];
 }
 
+const seriesDescriptions: Record<string, string> = {
+  'Generative AI in Production': 'A practical guide to building with LLMs beyond the demos — understanding how they work, where they break, and how to ship them responsibly in real systems.',
+  'Kubernetes Design Patterns': 'Core patterns for designing workloads, pod architectures, and service communication in Kubernetes. From first principles to the decisions that actually matter in production.',
+  'Open Source vs Closed LLMs': 'A clear-eyed look at the open-source and proprietary AI landscape — capabilities, trade-offs, cost, and how to pick the right model for your use case.',
+};
+
 const { seriesName, posts } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const seriesDescription = seriesDescriptions[seriesName] ?? `A ${posts.length}-part series exploring ${seriesName}.`;
 const seriesSlugLocal = seriesName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 const pageUrl = new URL(`${base}/series/${seriesSlugLocal}`, Astro.site ?? 'https://chaitanyamaili.in').toString();
 
@@ -41,7 +48,7 @@ const allTags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))];
 const totalReadingTime = sortedPosts.reduce((sum, p) => sum + (p.data.readingTime ?? 0), 0);
 ---
 
-<BaseLayout title={`${seriesName} — Chaitanya Maili`} description={`A ${totalParts}-part series on ${seriesName}`}>
+<BaseLayout title={`${seriesName} — Chaitanya Maili`} description={seriesDescription}>
   <div class="space-y-10">
 
     <!-- Back link -->
@@ -67,6 +74,8 @@ const totalReadingTime = sortedPosts.reduce((sum, p) => sum + (p.data.readingTim
       </div>
 
       <h1 class="text-3xl font-bold tracking-tight">{seriesName}</h1>
+
+      <p class="text-base text-muted-foreground leading-relaxed max-w-2xl">{seriesDescription}</p>
 
       <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
         <span>{totalParts} parts published</span>

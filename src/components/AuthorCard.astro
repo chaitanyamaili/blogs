@@ -1,0 +1,50 @@
+---
+const links = [
+  {
+    label: 'Portfolio',
+    href: 'https://chaitanyamaili.in',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://linkedin.com/in/chaitanyamaili',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>`,
+  },
+];
+---
+
+<aside class="mt-12 pt-8 border-t border-border">
+  <div class="flex items-start gap-4">
+    <!-- Avatar -->
+    <div
+      class="shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold select-none"
+      aria-hidden="true"
+    >
+      CM
+    </div>
+
+    <!-- Details -->
+    <div class="flex-1 min-w-0">
+      <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Written by</p>
+      <p class="font-semibold text-foreground text-base leading-tight">Chaitanya Maili</p>
+      <p class="text-sm text-muted-foreground mt-1 leading-relaxed">
+        Staff engineer. Thinking through the hard parts of engineering, AI, and technical career growth — out loud.
+      </p>
+
+      <!-- Links -->
+      <div class="flex flex-wrap items-center gap-3 mt-3">
+        {links.map((link) => (
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Fragment set:html={link.icon} />
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</aside>
