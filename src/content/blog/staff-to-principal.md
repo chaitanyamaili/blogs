@@ -6,6 +6,15 @@ tags: ["career", "engineering leadership", "principal engineer"]
 readingTime: 7
 ---
 
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin-bottom:2rem;">
+  <iframe
+    src="https://www.youtube.com/embed/yrIz5z7pqMQ"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+    allowfullscreen
+    title="What Actually Changes When You Go From Staff to Principal Engineer">
+  </iframe>
+</div>
+
 I'll be honest — I used to think the jump from Staff to Principal was mostly about knowing more stuff.
 
 More languages. Deeper distributed systems knowledge. Better architectural instincts. The kind of thing that comes from grinding through enough hard problems that eventually you're one of the people others come to when nothing makes sense.
