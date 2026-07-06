@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <defs>
+    <style><![CDATA[
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+    ]]></style>
+
+    <!-- Background: deep indigo radial gradient (matches favicon palette) -->
+    <radialGradient id="bg" cx="50%" cy="44%" r="72%">
+      <stop offset="0%" stop-color="#353664"/>
+      <stop offset="100%" stop-color="#1a1530"/>
+    </radialGradient>
+
+    <!-- Chai liquid: warm amber top to deep brown bottom -->
+    <linearGradient id="chai" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#fbbf24"/>
+      <stop offset="45%"  stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+
+    <!-- Glass left-side shine -->
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.16)"/>
+      <stop offset="28%"  stop-color="rgba(255,255,255,0.06)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+
+    <!-- Clip to glass interior shape -->
+    <clipPath id="gc">
+      <path d="M432,252 L768,252 L738,588 L462,588 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ══════════════════════════════════════
+       BACKGROUND
+  ══════════════════════════════════════ -->
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+
+  <!-- ══════════════════════════════════════
+       CHAI GLASS
+  ══════════════════════════════════════ -->
+
+  <!-- Liquid fill (clipped to glass trapezoid) -->
+  <g clip-path="url(#gc)">
+    <rect x="428" y="268" width="344" height="322" fill="url(#chai)"/>
+    <!-- Tea surface shimmer -->
+    <ellipse cx="600" cy="270" rx="148" ry="9" fill="#fde68a" opacity="0.48"/>
+  </g>
+
+  <!-- Glass outline (trapezoid: wider at top, narrower at bottom) -->
+  <path d="M430,250 L770,250 L740,590 L460,590 Z"
+        fill="none" stroke="rgba(255,255,255,0.62)" stroke-width="3.5"
+        stroke-linejoin="round"/>
+
+  <!-- Top rim highlight -->
+  <rect x="428" y="242" width="344" height="13" rx="4"
+        fill="rgba(255,255,255,0.30)"/>
+
+  <!-- Bottom base highlight -->
+  <rect x="458" y="588" width="284" height="9" rx="4"
+        fill="rgba(255,255,255,0.20)"/>
+
+  <!-- Left-side glass shine overlay -->
+  <path d="M430,250 L770,250 L740,590 L460,590 Z" fill="url(#shine)"/>
+
+  <!-- ══════════════════════════════════════
+       STEAM WISPS (S-curve beziers)
+  ══════════════════════════════════════ -->
+
+  <!-- Left wisp -->
+  <path d="M510,250 C488,215 528,192 508,162 C488,132 520,112 503,85"
+        fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="4.5"
+        stroke-linecap="round"/>
+
+  <!-- Center wisp (tallest) -->
+  <path d="M600,244 C575,208 628,178 600,146 C572,114 620,88 598,56"
+        fill="none" stroke="rgba(255,255,255,0.60)" stroke-width="5"
+        stroke-linecap="round"/>
+
+  <!-- Right wisp -->
+  <path d="M690,250 C712,213 672,190 692,160 C712,130 678,110 698,82"
+        fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="4.5"
+        stroke-linecap="round"/>
+
+  <!-- ══════════════════════════════════════
+       FLOATING CODE GLYPHS
+  ══════════════════════════════════════ -->
+
+  <!-- {} — upper-left -->
+  <text transform="translate(248,310) rotate(-15)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="56" font-weight="bold"
+        fill="#fcfb9b" opacity="0.90">{}</text>
+
+  <!-- &lt;/&gt; — upper-right -->
+  <text transform="translate(800,278) rotate(10)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="46" font-weight="bold"
+        fill="#a8dc9f" opacity="0.90">&lt;/&gt;</text>
+
+  <!-- const — right-middle -->
+  <text transform="translate(832,432) rotate(8)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="38"
+        fill="rgba(255,255,255,0.66)">const</text>
+
+  <!-- => — lower-right -->
+  <text transform="translate(770,608) rotate(-12)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="50" font-weight="bold"
+        fill="#fcfb9b" opacity="0.86">=&gt;</text>
+
+  <!-- // — lower-center -->
+  <text transform="translate(528,664) rotate(5)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="44"
+        fill="rgba(255,255,255,0.46)">//</text>
+
+  <!-- [] — lower-left -->
+  <text transform="translate(290,612) rotate(18)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="52" font-weight="bold"
+        fill="#a8dc9f" opacity="0.84">[]</text>
+
+  <!-- async — left-middle -->
+  <text transform="translate(192,462) rotate(-8)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="36"
+        fill="rgba(255,255,255,0.56)">async</text>
+
+  <!-- fn — upper-left-center -->
+  <text transform="translate(362,192) rotate(12)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="52" font-weight="bold"
+        fill="#fcfb9b" opacity="0.82">fn</text>
+
+  <!-- AI — upper-right, most prominent glyph -->
+  <text transform="translate(720,170) rotate(-6)"
+        font-family="'Courier New',Courier,monospace"
+        font-size="60" font-weight="bold"
+        fill="#ffffff" opacity="0.94">AI</text>
+
+  <!-- ══════════════════════════════════════
+       SPARKLE DOTS
+  ══════════════════════════════════════ -->
+  <circle cx="415" cy="140" r="4.5" fill="#fcfb9b"             opacity="0.65"/>
+  <circle cx="772" cy="124" r="3.5" fill="#a8dc9f"             opacity="0.58"/>
+  <circle cx="225" cy="362" r="3"   fill="#fcfb9b"             opacity="0.46"/>
+  <circle cx="912" cy="338" r="4"   fill="#a8dc9f"             opacity="0.54"/>
+  <circle cx="895" cy="512" r="3"   fill="#fcfb9b"             opacity="0.44"/>
+  <circle cx="288" cy="515" r="3"   fill="rgba(255,255,255,1)" opacity="0.36"/>
+  <circle cx="655" cy="678" r="4"   fill="#a8dc9f"             opacity="0.44"/>
+  <circle cx="458" cy="682" r="3"   fill="#fcfb9b"             opacity="0.44"/>
+  <circle cx="848" cy="162" r="5"   fill="rgba(255,255,255,1)" opacity="0.26"/>
+  <circle cx="275" cy="225" r="4"   fill="#a8dc9f"             opacity="0.36"/>
+  <circle cx="548" cy="108" r="3"   fill="rgba(255,255,255,1)" opacity="0.32"/>
+  <circle cx="942" cy="440" r="3.5" fill="#fcfb9b"             opacity="0.38"/>
+
+  <!-- ══════════════════════════════════════
+       WORDMARK & TAGLINE
+  ══════════════════════════════════════ -->
+
+  <!-- Subtle divider line -->
+  <line x1="335" y1="726" x2="865" y2="726"
+        stroke="rgba(255,255,255,0.10)" stroke-width="1.5"/>
+
+  <!-- "Chai & Code" — bold wordmark, & in yellow-green accent -->
+  <text x="600" y="822" text-anchor="middle"
+        font-family="Inter,'Helvetica Neue',Arial,sans-serif"
+        font-size="116" font-weight="700"
+        fill="white" letter-spacing="-1">Chai <tspan fill="#fcfb9b">&amp;</tspan> Code</text>
+
+  <!-- Tagline -->
+  <text x="600" y="904" text-anchor="middle"
+        font-family="Inter,'Helvetica Neue',Arial,sans-serif"
+        font-size="44" font-weight="400"
+        fill="#a8dc9f" letter-spacing="0.3" opacity="0.86">Engineering thoughts, one sip at a time</text>
+</svg>
