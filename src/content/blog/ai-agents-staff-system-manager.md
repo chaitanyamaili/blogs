@@ -96,7 +96,7 @@ The function matters less than the boundary. Everything on the model's side of t
 
 ## Delegation is a skill, and most of us are bad at it
 
-A failure I'd expect to be common, and worth checking for on any team, is less the model being wrong than the engineer delegating the way they'd delegate to someone they didn't trust: a one-line prompt, no context, no criteria, then a read of the result with a sinking feeling. `[YOUR CALL: if you've seen this pattern firsthand, say so here and name where. Otherwise leave it as an expectation.]`
+A failure I'd expect to be common, and worth checking for on any team, is less the model being wrong than the engineer delegating the way they'd delegate to someone they didn't trust: a one-line prompt, no context, no criteria, then a read of the result with a sinking feeling.
 
 The better pattern looks like working with a capable junior colleague. You talk before you start. You describe the problem, ask what's unclear, push on the plan, and only then let it execute. You write down the conventions once (naming, style, what "done" means) so the next task starts from them. And when the output misses, you ask why it missed and change the instructions, instead of only fixing the output.
 
