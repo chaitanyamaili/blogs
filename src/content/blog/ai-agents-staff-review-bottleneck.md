@@ -125,9 +125,11 @@ Vendors are pushing hard on AI review, and about 80% of the firms in the Harvard
 
 My position is that a second model is a useful pre-filter and a bad final authority, for a specific reason. A model reviewing a model's output shares many of its blind spots. Research on multi-agent critique is mixed: debate between agents can beat self-critique on some tasks, but agents also tend to converge politely, reinforcing each other's errors. I'll go deeper on that in Part 4. For now, the practical rule is that an agent reviewer can flag things for a human to look at, but a Tier 3 change doesn't merge because an agent said LGTM.
 
+One caution from my own use: Copilot code review felt like the boy who cried wolf. A pre-filter that flags too much teaches people to stop reading it, and then it isn't filtering anything.
+
 Some teams are doing this at scale. PostHog says its "StampHog" agent gives the final stamp on roughly one in three merged PRs in its main repo ([PostHog newsletter](https://newsletter.posthog.com/p/code-review-tips)). Another PostHog post puts the figure at about 20%, so treat the exact share as approximate. What matters is how it's gated: engineers opt in with a label, a deny-list keeps auth, secrets, billing and public APIs out, diffs must stay under 500 lines and 20 files, and the agent can approve but never merge. They routed by risk, which is the same idea as the table above.
 
-`[YOUR STORY HERE: a real review where an agent-generated change looked clean and wasn't, or where an agent pre-review caught something you'd have missed. Which tier would it have been? What did the reviewer actually check? If you've also had the opposite experience, an agent reviewer crying wolf and training people to ignore it, that's worth including too.]`
+I've hit the problem these gates exist for. In my early days of relying on AI coding through prompts, the code worked, but it wasn't efficient and it didn't cover edge cases. My peer reviews caught many of those gaps, which meant the review went through too many iterations. That is the failure a polished agent change produces: it passes the obvious check, and the cost sits in the cases nobody looked at.
 
 ---
 
