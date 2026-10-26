@@ -6,6 +6,7 @@ tags: ["ai agents", "staff engineer", "engineering leadership", "llm", "producti
 readingTime: 10
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 1
+draft: true
 ---
 
 Last weekend I watched an agent rewrite my LinkedIn profile, update my personal site, scaffold this blog, and find a broken Google Analytics script I'd forgotten about for months. Work I'd have spread across a week of evenings took a few focused hours.
@@ -138,7 +139,7 @@ Better to give you the failure modes now than let the rest of the series read as
 
 **Losing the muscle.** This is the one I take most seriously and have the least evidence about. If the agent always does the first draft, does your ability to produce one atrophy, and does that erode your ability to judge someone else's? I don't have a clean answer. I suspect the answer is yes for some skills and no for others, and I don't yet know which.
 
-`[YOUR STORY HERE: one real moment where you over-trusted an agent, or where its output was wrong in a way you almost missed. What did you check, and when did you catch it? A specific tool, a specific ticket, a specific cost, if you have one. This is the admitted-mistake beat the post needs and I can't write it for you.]`
+I've made this mistake myself. When I started using AI, I trusted it too much. One day I was writing technical docs with AI bots, and I realized the result had turned into clutter: too many words, and the same content duplicated across the docs. It's a mild version of fluent wrongness: the problem was volume, and an agent never pushes back on volume.
 
 ---
 
