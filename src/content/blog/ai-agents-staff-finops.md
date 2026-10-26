@@ -6,6 +6,7 @@ tags: ["ai agents", "finops", "cost optimization", "llm", "engineering leadershi
 readingTime: 10
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 5
+draft: true
 ---
 
 One of the incident reports I found while researching this post describes a four-agent pipeline that looped between an analyzer and a verifier for eleven days before the billing dashboard showed it. The reported damage was $47,000. Another, a public bug report filed on Claude Code's GitHub tracker on 31 December 2025, describes a sub-agent that retried a failing `npm install` verbatim, over 300 identical tool calls and roughly 27 million tokens in about 4.6 hours. The issue was later closed as not planned.
@@ -35,7 +36,7 @@ print(total_input_tokens(20))  # 20 steps ->   770,000
 print(total_input_tokens(40))  # 40 steps -> 2,740,000
 ```
 
-Doubling the steps from 20 to 40 more than triples the input tokens (about 3.6x). This is the superlinear shape the FinOps sources describe, and it's why "just let it run a few more rounds" is more expensive than it feels. Those same sources estimate agentic tasks use anywhere from about 5 to 30 times the tokens of ordinary chat, though most of that comes from vendor blogs, so I'd treat the multiplier as a rough order of magnitude and measure your own.
+Doubling the steps from 20 to 40 more than triples the input tokens (about 3.6x). This is the superlinear shape the FinOps sources describe, and it's why "just let it run a few more rounds" is more expensive than it feels. Measure your own runs rather than trusting a quoted multiplier, since the figures in circulation come mostly from vendor blogs.
 
 > **Principal Engineer's take:** The unit that matters isn't cost per token or even cost per call. It's cost per completed task, which includes every retry, every loop round and every step an agent took that you threw away. A cheap model that takes 40 steps can cost more than an expensive one that takes 8. If you're only watching the per-token price, you're optimizing the wrong number.
 
@@ -47,13 +48,11 @@ Most cost advice reduces to four levers. The savings figures you'll see quoted a
 
 **Prompt caching.** Because agents resend a large, mostly identical prefix, caching it is the biggest structural win. Per Anthropic's docs, cache reads cost 0.1 times the base input price for most models and less for some newer ones. A write costs 1.25 times for the 5-minute cache and 2 times for the 1-hour cache. OpenAI's discount varies by model. Output tokens aren't discounted. The practical rule is to put static content first (system prompt, tool schemas, the design document) and variable content last, because cache hits depend on a stable prefix. Pricing and cache lifetimes change often. Check the providers' pricing pages for current numbers before you build a budget on them.
 
-**Model routing.** Send simple steps (classification, extraction, format checks) to a cheap model and escalate to a stronger one on low confidence or hard steps. List prices differ by up to roughly two orders of magnitude across tiers, so routing is probably the largest single lever. It also has a cost I rarely see mentioned: you now need an evaluation to know the cheap model is good enough for each step, or you save money and quietly lose quality.
+**Model routing.** Send simple steps (classification, extraction, format checks) to a cheap model and escalate to a stronger one on low confidence or hard steps. List prices differ widely across model tiers, so routing is probably the largest single lever. It also has a cost I rarely see mentioned: you now need an evaluation to know the cheap model is good enough for each step, or you save money and quietly lose quality.
 
-**Pruning context.** Stale tool results sitting in the conversation get resent every step. Dropping or summarizing them cuts input tokens directly. One example I found reported a 75% cut in accumulated tool-result context. Pruning also risks removing something the agent needed, so treat it as something to test.
+**Pruning context.** Stale tool results sitting in the conversation get resent every step. Dropping or summarizing them cuts input tokens directly. Pruning also risks removing something the agent needed, so treat it as something to test.
 
 **Capping steps and time.** The cheapest token is the one never sent. A hard ceiling on turns, recursion depth and wall-clock time bounds the worst case.
-
-One source stacks these for a solo developer: caching, then routing, then compression took a $3,200 bill to $380. Read that as "the levers compound", not as a number you'll reproduce. It's a single self-reported case.
 
 ---
 
@@ -148,8 +147,6 @@ Cost dashboards that show spend by model are the easy part and the least useful.
 | Review time per agent artifact | The hidden cost from Part 2: human hours dwarf token cost | Track reviewer time on agent PRs |
 
 That last row deserves emphasis. Every number above is a machine cost. In Part 2 the data pointed to review time as the real bottleneck, and a senior engineer's hour almost certainly costs more than the tokens that produced the thing they're reading. A cost model that counts tokens and ignores review hours will conclude that more agent output is always cheaper. I'd rather include a rough human-hours estimate, even a crude one, than present a spend figure that flatters the agents.
-
-Also keep this in proportion. One of the sources I found claims integration and compliance, not inference, drive 40% to 60% of real deployment cost. I couldn't verify that figure and it's from a vendor-flavoured blog, but the direction is plausible: the model bill is often the visible part, not the largest part.
 
 `[YOUR STORY HERE: your own first surprise bill or near-miss with an agent, if you have one. What ran, what did it cost, what did you notice first, and what guard did you add afterwards? If you don't have one, say what you currently do to cap spend. A candid "I don't measure this yet" is also a fine and useful thing to write.]`
 

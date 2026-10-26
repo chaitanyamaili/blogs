@@ -6,6 +6,7 @@ tags: ["ai agents", "multi-agent", "system design", "reliability", "llm"]
 readingTime: 10
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 4
+draft: true
 ---
 
 The pitch for adversarial agent loops is seductive. One agent plays the Architect and proposes the design and its mitigations. A second plays a Chaos SRE whose only job is to break them. They go two rounds, and you get a hardened design for the price of some tokens.
@@ -155,7 +156,7 @@ The loop is also a poor fit when you can't supply the environment details. If th
 
 ## What this costs
 
-This is the part where the earlier posts' cost notes come due. Per the FinOps sources I found, agentic work uses roughly 5 to 30 times the tokens of ordinary chat, because each step re-sends its context, so cost grows faster than linearly with steps. A loop has that structure by design: every critic and defender call carries the full design plus the environment plus prior findings.
+This is the part where the earlier posts' cost notes come due. Agentic work uses far more tokens than ordinary chat, because each step re-sends its context, so cost grows faster than linearly with steps. A loop has that structure by design: every critic and defender call carries the full design plus the environment plus prior findings.
 
 The back-of-envelope version is the formula one guide gives: cost per task is (input plus output tokens) times price times steps. Plug in your design size, multiply by calls per round, rounds, and the number of attacks each defender call must answer, and you'll see how quickly it adds up. I won't quote a dollar figure for your case because it depends on your model and prompt sizes. Run one loop with the hard token cap on, read the actual usage, and write the number next to the findings it produced. That ratio, cost per valid finding that a human accepted, is the metric I'd track. Part 5 builds on exactly that.
 

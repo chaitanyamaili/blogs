@@ -6,6 +6,7 @@ tags: ["ai agents", "agents.md", "skills", "staff engineer", "engineering leader
 readingTime: 11
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 6
+draft: true
 ---
 
 The advice on this topic is nearly unanimous. Write a context file. Put your conventions in `CLAUDE.md` or `AGENTS.md`. Package your review standards as skills. Give every agent a written job description. Addy Osmani and most of the senior-engineer guides I read say some version of it (Osmani adds that humans, not agents, should write the file), and in Part 1 I said "own the context" myself.

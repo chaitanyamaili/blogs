@@ -6,6 +6,7 @@ tags: ["ai agents", "staff engineer", "productivity", "engineering leadership", 
 readingTime: 11
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 7
+draft: true
 ---
 
 In 2025, METR ran a randomized trial with 16 experienced open-source developers working on 246 real issues in repositories they knew well. The developers expected AI tools to make them about 24% faster. Afterwards they still believed it had made them about 20% faster. The measured result was that the tasks took 19% longer when AI was allowed.

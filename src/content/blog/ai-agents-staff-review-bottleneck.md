@@ -6,6 +6,7 @@ tags: ["ai agents", "code review", "engineering leadership", "governance", "staf
 readingTime: 10
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 2
+draft: true
 ---
 
 Here is the most uncomfortable statistic I came across while researching this series: at firms that adopted coding agents, engineers added about 30% more code, and the time from opening a pull request to merging it rose 49%.

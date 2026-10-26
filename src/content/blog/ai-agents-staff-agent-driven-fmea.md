@@ -6,6 +6,7 @@ tags: ["ai agents", "fmea", "system design", "reliability", "kafka", "postgres"]
 readingTime: 11
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 3
+draft: true
 ---
 
 A design for an event-driven checkout system, fed to an agent, comes back in under a minute as a clean table. Component, failure mode, systemic impact, severity, likelihood, detection, a risk priority number, a mitigation. It looks like the output of a week of workshop time.
@@ -38,7 +39,7 @@ These are small studies in medical and automotive settings, not software, so tre
 
 Before building on the severity × likelihood × detection multiplication, a caution: the risk priority number has known weaknesses even in manufacturing. The three scales are ordinal, not ratio, so multiplying them gives numbers that look precise and aren't. Quite different risk profiles can produce the same product. A severity of 10 with low likelihood can tie with a boring 5-5-4 failure.
 
-My understanding is that the 2019 AIAG-VDA FMEA handbook moved away from ranking by RPN toward an "action priority" scheme for this reason. I haven't re-read the handbook for this post, so verify that before you cite it. Either way, if you use RPN, use it to sort a conversation and not to settle one. Severity deserves veto power: anything with data loss, double charging or security impact gets looked at regardless of its product.
+The 2019 AIAG-VDA FMEA handbook replaced ranking by RPN with an "action priority" lookup table for this reason ([practitioner guide](https://metricmech.com/articles/fmea-action-priority)). I haven't read the handbook itself, so check it before you cite it. Either way, if you use RPN, use it to sort a conversation and not to settle one. Severity deserves veto power: anything with data loss, double charging or security impact gets looked at regardless of its product.
 
 ---
 
