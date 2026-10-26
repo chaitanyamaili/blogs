@@ -1,12 +1,11 @@
 ---
 title: "From Task-Doer to System Manager: What Staff+ Engineers Actually Do With AI Agents"
 description: "Agents write the first draft. A Staff+ engineer's value shifts to defining done, owning context, routing review and accountability. Part 1 of 7."
-pubDate: 2026-10-26
+pubDate: 2026-10-27
 tags: ["ai agents", "staff engineer", "engineering leadership", "llm", "productivity"]
 readingTime: 10
 series: "AI Agents for Staff+ Engineers"
 seriesPart: 1
-draft: true
 ---
 
 Last weekend I watched an agent rewrite my LinkedIn profile, update my personal site, scaffold this blog, and find a broken Google Analytics script I'd forgotten about for months. Work I'd have spread across a week of evenings took a few focused hours.

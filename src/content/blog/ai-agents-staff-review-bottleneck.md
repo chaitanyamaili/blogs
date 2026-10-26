@@ -1,7 +1,7 @@
 ---
 title: "The Review Bottleneck: Agents Write More Code, Not More Shipped Software"
 description: "Coding agents raise output and slow review. How to route review by risk, make diffs cheap to check, and decide what not to delegate. Part 2 of 7."
-pubDate: 2026-10-26
+pubDate: 2026-11-03
 tags: ["ai agents", "code review", "engineering leadership", "governance", "staff engineer"]
 readingTime: 10
 series: "AI Agents for Staff+ Engineers"
